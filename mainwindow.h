@@ -17,6 +17,10 @@
 
 #include "vcontrol.h"
 
+
+#define ASK_BEFORE_ENABLE
+
+
 namespace Ui {
 class MainWindow;
 }

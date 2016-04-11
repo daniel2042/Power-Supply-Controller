@@ -117,7 +117,7 @@ MainWindow::MainWindow(QWidget *parent) :
     softstart_checkbox = new QCheckBox(this);
     softstart_checkbox->setGeometry(10,290,100,25);
     softstart_checkbox->setText("Soft Start");
-    softstart_checkbox->setChecked(true);
+    //softstart_checkbox->setChecked(true);
 
     power_on = new QPushButton(this);
     power_on->setGeometry(10,SIZEY - 75,150,45);
@@ -164,6 +164,7 @@ MainWindow::MainWindow(QWidget *parent) :
     sinus_amplitude->setText(QString::number(control.Get_Sinus_Amplitude()));
 
     Find_COM();
+    Open_COM();
 
 }
 
@@ -171,17 +172,19 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::Output()
 {
     QMessageBox mess;
-    mess.setText("Are you sure you want to enable output?");
+    mess.setWindowIcon(QIcon("icon.png"));
 
     if(power_on->text() == "Enable Output")  // Output Disabled
     {
-       if(mess.warning(this,"Warning","Are you sure you want to enable output?", QMessageBox::Yes | QMessageBox::Cancel) == QMessageBox::Yes)
-       {
-            high_voltage_indicator->setVisible(true);
-            power_on->setText("Disable Output");
-            power_on->setIcon(QIcon(""));
-            control.Set_Enable();
-       }
+       #ifdef ASK_BEFORE_ENABLE
+            if(mess.warning(this,"Warning","Are you sure you want to enable output?", QMessageBox::Yes | QMessageBox::Cancel) == QMessageBox::Yes)
+       #endif
+            {
+                high_voltage_indicator->setVisible(true);
+                power_on->setText("Disable Output");
+                power_on->setIcon(QIcon(""));
+                control.Set_Enable();
+            }
     }
     else
     {
@@ -203,7 +206,7 @@ void MainWindow::Voltage_Set()
 
     if(ok)
     {
-        if(val >= 0 && val < 10000)
+        if(val >= 0 && val <= 10000)
         {
             control.Set_Output_Value(val);
             out_voltage->setText(QString::number(control.Get_Output_Value()));
@@ -211,6 +214,7 @@ void MainWindow::Voltage_Set()
         else
         {
             mess.setText("Voltage out of range");
+            mess.setWindowIcon(QIcon("icon.png"));
             mess.setIcon(QMessageBox::Warning);
             mess.exec();
             out_voltage->setText(QString::number(control.Get_Output_Value()));
@@ -219,6 +223,7 @@ void MainWindow::Voltage_Set()
     else
     {
         mess.setText(("Output voltage value is not an integer"));
+        mess.setWindowIcon(QIcon("icon.png"));
         mess.setIcon(QMessageBox::Warning);
         mess.exec();
         out_voltage->setText(QString::number(control.Get_Output_Value()));
@@ -235,7 +240,7 @@ void MainWindow::Rise_Set()
 
     if(ok)
     {
-        if(val >= -1000 && val < 1000)
+        if(val >= 0 && val < 60000)
         {
             control.Set_Rise_Value(val);
             ramp_value->setText(QString::number(control.Get_Rise_Value()));
@@ -243,6 +248,7 @@ void MainWindow::Rise_Set()
         else
         {
             mess.setText("Value out of range");
+            mess.setWindowIcon(QIcon("icon.png"));
             mess.setIcon(QMessageBox::Warning);
             mess.exec();
             ramp_value->setText(QString::number(control.Get_Rise_Value()));
@@ -252,6 +258,7 @@ void MainWindow::Rise_Set()
     {
         mess.setText(("Value is not an integer"));
         mess.setIcon(QMessageBox::Warning);
+        mess.setWindowIcon(QIcon("icon.png"));
         mess.exec();
         ramp_value->setText(QString::number(control.Get_Rise_Value()));
     }
@@ -277,6 +284,7 @@ void MainWindow::Sinus_Set()
         {
             mess.setText("Value out of range");
             mess.setIcon(QMessageBox::Warning);
+            mess.setWindowIcon(QIcon("icon.png"));
             mess.exec();
             sinus_amplitude->setText(QString::number(control.Get_Sinus_Amplitude()));
         }
@@ -285,6 +293,7 @@ void MainWindow::Sinus_Set()
     {
         mess.setText(("Value is not an integer"));
         mess.setIcon(QMessageBox::Warning);
+        mess.setWindowIcon(QIcon("icon.png"));
         mess.exec();
         sinus_amplitude->setText(QString::number(control.Get_Sinus_Amplitude()));
     }
@@ -328,13 +337,15 @@ void MainWindow::Open_COM()
     {
         mess.setText("Unable to Open " + serialport_combobox->itemText(serialport_combobox->currentIndex()));
         mess.setIcon(QMessageBox::Warning);
+        mess.setWindowIcon(QIcon("icon.png"));
         mess.exec();
     }
     else
     {
         mess.setText(serialport_combobox->itemText(serialport_combobox->currentIndex()) + " successfully opened");
         mess.setIcon(QMessageBox::Information);
-        mess.exec();
+        mess.setWindowIcon(QIcon("icon.png"));
+        //mess.exec();
         tim->start();
          control.Set_DAC(serial);
 
@@ -345,11 +356,26 @@ void MainWindow::Open_COM()
 void MainWindow::COM()
 {
 
+    QString volt;
+
     control.Set_DAC(serial);
     int n = control.Get_ADC(serial);
 
     if(n >= 0)
-        out_voltage_read->setText("Output voltage: " + QString::number(n/1000) + " " +  QString::number(n% 1000));
+    {
+        volt = QString::number(n/1000) + " ";
+        if(n % 1000 < 10)
+            volt += "0";
+        if(n % 1000 < 100)
+            volt += "0";
+        volt += QString::number(n% 1000);
+        out_voltage_read->setText("Output voltage: " + volt + "V");
+        if(n > 500)
+            out_voltage_read->setStyleSheet("QLabel { font-weight: bold; color : red; }");
+        else
+            out_voltage_read->setStyleSheet("QLabel { color : black; }");
+    }
+
 }
 
 

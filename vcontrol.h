@@ -11,8 +11,12 @@ private:
     int sinus_amplitude;
     int sinus_frequency;
 
+    int current_DAC_value;
+    int actual_DAC_value;
     bool soft_start;
     bool enable;
+
+    int Calculate_DAC();
 public:
 
 
