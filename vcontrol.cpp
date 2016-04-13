@@ -2,7 +2,8 @@
 #include "vcontrol.h"
 #include <cmath>
 
-#define DAC_COEFFICIENT 0.24
+#define DAC_COEFFICIENT 0.251
+#define VOLTAGE_MULTIPLIER_RATIO 1.06
 
 VControl::VControl()
 {
@@ -16,7 +17,7 @@ VControl::VControl()
 }
 int VControl::Get_Voltage_Value()
 {
-    return 0;
+    return VOLTAGE_MULTIPLIER_RATIO*(this->actual_DAC_value * 10000) / 4095;
 }
 
 void VControl::Set_Disable()
@@ -134,7 +135,7 @@ int VControl::Calculate_DAC()
 
             if(this->current_DAC_value >= 0)
             {
-                this->current_DAC_value;
+                //this->current_DAC_value;
                 return this->current_DAC_value + 2 * sinus_amplitude * DAC_COEFFICIENT * sin(sinus_frequency* time/16.0);
             }
             else
@@ -145,7 +146,6 @@ int VControl::Calculate_DAC()
 
 
 
-      //  return i;
     }
     else
     {
@@ -196,7 +196,7 @@ int VControl::Get_ADC(QSerialPort* port)
 
 
         this->actual_DAC_value = avrg(buf,5) * 1;
-        return 1.1*(this->actual_DAC_value * 10000) / 4095;
+        return VOLTAGE_MULTIPLIER_RATIO*(this->actual_DAC_value * 10000) / 4095;
     }
     return -1;
 

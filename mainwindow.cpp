@@ -1,8 +1,8 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 
 #define SIZEX 330
 #define SIZEY 400
+
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -206,7 +206,7 @@ void MainWindow::Voltage_Set()
 
     if(ok)
     {
-        if(val >= 0 && val <= 10000)
+        if(val >= 0 && val <= 15000)
         {
             control.Set_Output_Value(val);
             out_voltage->setText(QString::number(control.Get_Output_Value()));
