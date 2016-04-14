@@ -86,6 +86,7 @@ int VControl::Calculate_DAC()
             current_val += 0.025;
             current_DAC_value  = current_val;
             rise_val = current_DAC_value;
+
             return current_DAC_value;
         }
         else
@@ -97,6 +98,7 @@ int VControl::Calculate_DAC()
             if(old_rise != rise_voltage || old_out != out_value)
             {
                 //rise_val = actual_DAC_value;
+
 
 
                  rise = this->rise_voltage / 500.0f;
@@ -160,9 +162,14 @@ void VControl::Set_DAC(QSerialPort* port)
     int tmp = Calculate_DAC();
 
     char val[2];
+#ifdef Q_OS_LINUX
+    val[0] = (char)(unsigned int)tmp << 4;
+    val[1] = (unsigned int)tmp  >> 4;
+#endif
+#ifdef Q_OS_WINDOWS
     val[1] = (char)(unsigned int)tmp << 4;
     val[0] = (unsigned int)tmp  >> 4;
-
+#endif
     port->write(val,2);
 
 
